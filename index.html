@@ -3,53 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro Condomínio</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Clone do Discord</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script defer src="script.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; }
+        #sidebar { width: 20%; background: #2C2F33; color: white; padding: 10px; }
+        #chat { flex: 1; padding: 10px; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 5px; }
+        #voice-channel { background: #7289DA; color: white; padding: 10px; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Cadastro e Login</h1>
-        
-        <!-- Seção de Login -->
-        <div class="form-container" id="login-section">
-            <h2>Login</h2>
-            <form id="login-form">
-                <label for="login-email">E-mail:</label>
-                <input type="email" id="login-email" name="email" required><br><br>
-
-                <label for="login-password">Senha:</label>
-                <input type="password" id="login-password" name="password" required><br><br>
-
-                <button type="submit">Entrar</button>
-            </form>
-            <p>Não tem uma conta? <a href="javascript:void(0)" onclick="showRegister()">Cadastre-se</a></p>
-        </div>
-
-        <!-- Seção de Cadastro -->
-        <div class="form-container" id="register-section" style="display: none;">
-            <h2>Cadastro</h2>
-            <form id="register-form">
-                <label for="name">Nome Completo:</label>
-                <input type="text" id="name" name="name" required><br><br>
-
-                <label for="cpf">CPF:</label>
-                <input type="text" id="cpf" name="cpf" required maxlength="14"><br><br>
-
-                <label for="birthdate">Data de Nascimento:</label>
-                <input type="date" id="birthdate" name="birthdate" required><br><br>
-
-                <label for="register-email">E-mail:</label>
-                <input type="email" id="register-email" name="email" required><br><br>
-
-                <label for="register-password">Senha:</label>
-                <input type="password" id="register-password" name="password" required><br><br>
-
-                <button type="submit">Cadastrar</button>
-            </form>
-            <p>Já tem uma conta? <a href="javascript:void(0)" onclick="showLogin()">Faça Login</a></p>
-        </div>
+    <div id="sidebar">
+        <h2>Canais</h2>
+        <div id="voice-channel" onclick="joinVoiceChannel()">🔊 Entrar no Canal de Voz</div>
     </div>
-
-    <script src="script.js"></script>
+    <div id="chat">
+        <h2>Chat</h2>
+        <div id="messages"></div>
+        <input id="message-input" type="text" placeholder="Digite sua mensagem...">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <script>
+        const socket = io();
+        
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            if (input.value.trim() !== '') {
+                socket.emit('chat message', input.value);
+                input.value = '';
+            }
+        }
+        
+        socket.on('chat message', function(msg) {
+            const messages = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = msg;
+            messages.appendChild(messageElement);
+        });
+        
+        function joinVoiceChannel() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                console.log('Microfone ativado');
+                const audio = document.createElement('audio');
+                audio.srcObject = stream;
+                audio.play();
+            }).catch((err) => {
+                console.error('Erro ao acessar microfone:', err);
+            });
+        }
+    </script>
 </body>
 </html>
